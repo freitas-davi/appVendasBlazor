@@ -1,0 +1,75 @@
+﻿@page "/funcionarioForm/editar/{funcionarioId:int}"
+@page "/funcionarioForm/novo"
+@inject IFuncionarioService funcionarioService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<h3>FuncionariosForm</h3>
+
+<EditForm Model="@funcionario" OnInvalidSubmit="Salvar">
+    <div class="form-group">
+        <label>Nome:</label>
+        <InputText id="nome" class="form-control" @bind-Value="funcionario.Nome"/>
+    </div>
+    <div class="form-group">
+        <label>CPF:</label>
+        <InputText id="cpf" class="form-control" @bind-Value="funcionario.Cpf" />
+    </div>
+    <div class="form-group">
+        <label>E-mail:</label>
+        <InputText id="email" class="form-control" @bind-Value="funcionario.Email" />
+    </div>
+    <div class="form-group">
+        <label>Cargo:</label>
+        <InputText id="cargo" class="form-control" @bind-Value="funcionario.Cargo" />
+    </div>
+    <div class="form-group">
+        <label>Salário:</label>
+        <InputNumber id="salario" class="form-control" @bind-Value="funcionario.Salario" />
+    </div>
+    <div class="form-group">
+        <label>Data de admissão:</label>
+        <InputDate id="dtAdmissao" class="form-control" @bind-Value="funcionario.DataAdmissao" />
+    </div>
+    <button type="submit" class="btn btn-outline-info">Salvar</button>
+    <button type="button" @onclick="Cancelar" class="btn btn-warning">Cancelar</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int funcionarioId { get; set; }
+    private Funcionario funcionario = new Funcionario();
+
+    private string submitButtonText => funcionarioId == null ? "Adicionar" : "Atualizar";
+    protected override async Task OnInitializedAsync()
+    {
+        if(funcionarioId > 0)
+        {
+            funcionario = await funcionarioService.OterPorIdAsync(funcionarioId);
+        }
+        else
+        {
+            funcionario = new Funcionario();
+        }
+
+    }
+
+    private async Task Salvar()
+    {
+        if(funcionarioId == 0)
+        {
+            //Incluir novo registro pois funcionarioId = 0
+            await funcionarioService.AdicionarAsync(funcionario);
+        }
+        else
+        {
+            await funcionarioService.AlterarAsync(funcionario);
+        }
+        navigationManager.NavigateTo("/funcionarios");
+    }
+
+    private void Cancelar()
+    {
+        navigationManager.NavigateTo("/funcionarios");
+    }
+}
